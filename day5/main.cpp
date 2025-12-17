@@ -10,6 +10,14 @@
 
 #include "util.h"
 
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
+using std::map;
+using std::pair;
+
+/*----------------------------------------------------------*/
 
 long min(long a, long b) 
 {
@@ -41,51 +49,103 @@ std::pair<long, long>* findRange(std::vector<std::pair<long, long>>& ranges, lon
     return NULL;
 }
 
-
-int rangeOverlap(std::pair<long, long>& rng1, std::pair<long, long>& rng2)
+/*
+ 0 : No overlap
+ 1 : rng2 starts inside rng1, but ends outside rng1
+ 2 : rng2 starts inside rng1, and ends inside rng1
+*/
+int rangeOverlap(pair<long, long>& rnga, pair<long, long>& rngb, pair<long, long>& result)
 {
-    if (rng1.second <= rng2.second && rng1.second >= rng1.first) 
+    pair<long, long> rng1; /* rng1 must start before rng2 */
+    pair<long, long> rng2;
+
+    if (rnga.first < rngb.first) {
+        rng1.first = rnga.first;
+        rng1.second = rnga.second;
+        rng2.first = rngb.first;
+        rng2.second = rngb.second;
+    }
+    else
     {
-        /* range 1 end point is within range 2 */
-        return -1;
+        rng1.first = rngb.first;
+        rng1.second = rngb.second;
+        rng2.first = rnga.first;
+        rng2.second = rnga.second;
     }
 
-    if (rng1.first >= rng2.first && rng1.first <= rng2.second)
+    if (rng1.second < rng2.first) {
+        return 0; /* no overlap */
+    }
+
+    if (rng2.first <= rng1.second && rng2.second >= rng1.second) 
     {
-        /* range 1 start point is within range 2 */
+        /* range 2 starts within range 1, ends outside range 1 */
+        result.first = rng1.first;
+        result.second = rng2.second;
         return 1;
+    }
+
+    if (rng2.first >= rng1.first && rng2.second <= rng1.second)
+    {
+        /* range 2 starts within range 1 and ends within range 1 */
+        result.first = rng1.first;
+        result.second = rng1.second;
+        return 2;
     }
 
     return 0;
 }
 
 
-std::pair<long, long> consolidateRanges(std::pair<long, long>& rng1, std::pair<long, long>& rng2) 
+vector<pair<long, long>> consolidateRanges(vector<pair<long, long>>& rngs) 
 {
-    std::pair<long, long> retval(0, 0);
-
-    if (rangeOverlap(rng1, rng2) != 0)
+    vector<pair<long, long>> retval;
+    for (auto rng = rngs.begin(); rng != rngs.end(); rng++)
     {
-        long start1 = rng1.first;
-        long end1 = rng1.second;
-        long start2 = rng2.first;
-        long end2 = rng2.second;
+        bool found_overlap = false;
+        for (auto check = retval.begin(); check != retval.end(); check++)
+        {
+            pair<long, long> new_range;
+            int overlap = rangeOverlap(*rng, *check, new_range);
+            if (overlap == 0) {
+                /* no overlap detected */
+                continue;
+            }
+            /* add no new valid ranges, but modify check to hold new bounds */
+            found_overlap = true;
+            check->first = new_range.first;
+            check->second = new_range.second;
+            break;
+        }
 
-        long start = min(start1, start2);
-        long end = max(end1, end2);
-
-        retval.first = start;
-        retval.second = end;
+        if (!found_overlap){
+            retval.push_back(*rng);
+        }
     }
+    
+    return retval;
+
+}
+
+vector<pair<long, long>> boilDownRanges(vector<pair<long, long>>& rngs) 
+{
+    vector<pair<long, long>> last_ranges = rngs;
+    vector<pair<long, long>> retval = rngs;
+    do {
+        last_ranges = retval;
+        retval = consolidateRanges(last_ranges);
+    } while (retval.size() < last_ranges.size());
+
     return retval;
 }
 
 
 int main(int argc, char** argv) {
     
-    std::cout << "=================================\r\n";
-    std::cout << "========== DAY 5, 2025 ==========\r\n";
-    std::cout << "=================================\r\n";
+    std::cout << "===================================\r\n";
+    std::cout << "==========  DAY 5, 2025  ==========\r\n";
+    std::cout << "==========   CAFETERIA   ==========\r\n";
+    std::cout << "===================================\r\n";
 
 
     std::ifstream fin;
@@ -147,16 +207,17 @@ int main(int argc, char** argv) {
 
     std::cout << "\r\n===== PART 2 =====\r\n";
 
-    std::vector<std::pair<long, long>> fewer_ranges;
-
-    for (auto rng = ranges.begin(); rng != ranges.end(); rng++)
+    vector<pair<long, long>> final_ranges = boilDownRanges(ranges);
+    // vector<pair<long, long>> check_ranges = ranges;
+    // while (final_ranges.size() < check_ranges.size())
+    // {
+    //     final_ranges = consolidateRanges(check_ranges);
+    // }
+    
+    for (auto rng = final_ranges.begin(); rng != final_ranges.end(); rng++)
     {
-        auto check = rng + 1;
-        while (check != ranges.end())
-        {
-            if (rangeOverlap(*rng, *check)) {
-            }
-        }
+        cout << rng->first << "-" << rng->second << endl;
+        pt2_ans += (rng->second + 1) - rng->first;
     }
 
     std::cout << "PART 1 ANSWER: " << pt1_ans << std::endl;

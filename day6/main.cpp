@@ -89,6 +89,8 @@ int main(int argc, char** argv) {
         pt1_ans += answer;
     }
 
+    
+    
     std::cout << "PART 1 ANSWER: " << pt1_ans << std::endl;
     std::cout << "PART 2 ANSWER: " << pt2_ans << std::endl;
 

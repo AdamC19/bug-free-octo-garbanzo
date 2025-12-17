@@ -36,6 +36,8 @@ add_executable(day7 day7/main.cpp)
 add_executable(day8 day8/main.cpp)
 add_executable(day9 day9/main.cpp)
 add_executable(day10 day10/main.cpp)
+add_executable(day11 day11/main.cpp)
+add_executable(day12 day12/main.cpp)
 
 # Link the executable to the library
 # This step makes the library's functions available to the day19 executable.
@@ -77,5 +79,13 @@ target_link_libraries(
 )
 target_link_libraries(
     day10
+    AOC_Common
+)
+target_link_libraries(
+    day11
+    AOC_Common
+)
+target_link_libraries(
+    day12
     AOC_Common
 )
