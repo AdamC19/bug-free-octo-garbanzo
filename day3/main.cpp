@@ -14,7 +14,8 @@
 int main(int argc, char** argv) {
     
     std::cout << "=================================\r\n";
-    std::cout << "========== DAY 2, 2025 ==========\r\n";
+    std::cout << "========== DAY 3, 2025 ==========\r\n";
+    std::cout << "==========    LOBBY    ==========\r\n";
     std::cout << "=================================\r\n";
 
 
@@ -64,6 +65,33 @@ int main(int argc, char** argv) {
         }
         std::cout << "Max for line = " << max << "\r\n";
         pt1_ans += max;
+
+        int i = 0;
+        char num2[13] = {0};
+        memset(num2, '\0', 13);
+        int i_start = 0;
+        while (strlen(num2) < DIGITS)
+        {
+            /* find highest valued digit */
+            int stop_at = line->length() - (DIGITS - strlen(num2));
+            int i_of_max = -1;
+            int max_dig = 0;
+            for (int ii = i_start; ii <= stop_at; ii++)
+            {
+                int dig = line->at(ii) - 48;
+                if (dig > max_dig)
+                {
+                    max_dig = dig;
+                    i_of_max = ii;
+                }
+            }
+            i_start = i_of_max + 1;
+            num2[i] = line->at(i_of_max);
+            i++;
+        }
+        long max_pt2 = atol(num2);
+        pt2_ans += max_pt2;
+        std::cout << "Max for line PART 2 = " << max_pt2 << "\r\n";
     }
 
 
